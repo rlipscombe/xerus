@@ -113,7 +113,7 @@ This is `_OP_RETURN`.
 
 The bytecode format is spookily similar to Lua's, including the order of the parts.
 
-Squirrel literals are referred to as constants in Lua.
+Squirrel literals are referred to as constants in Lua. Squirrel only seems to use them for strings, though it stores the full object. Lua apparently allows them to be used for integers, etc., as well.
 Squirrel outers are Lua upvalues.
 
 http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.html

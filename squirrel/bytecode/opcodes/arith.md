@@ -38,10 +38,25 @@ Let's try something a bit more complicated:
     04 00 00 00 | 11 | 03 | 03 | 00     ; (add r3 r4 r3)    ;; r3 := r3 + r4 ;; r3 used for 'b'
     03 00 00 00 | 11 | 04 | 02 | 00     ; (add r2 r3 r4)    ;; r4 := r2 + r3 ;; r4 used for 'c'
 
-The compiler seems to keep a high-water-mark when allocating registers.
+The compiler seems to keep a high-water-mark when allocating registers. It doesn't appear to reuse registers if a variable is no longer used, but it will use the variable's register for one of the operands before the variable needs it.
+
+TODO:
+
+    local a = 1234;
+    local b = a + 1234;
+    local c = a + b + 1234;
+
+    local a = 5678;
+    a = a + a + a;
 
 ## `_OP_SUB = 0x12` -
 ## `_OP_MUL = 0x13` -
 ## `_OP_DIV = 0x14` -
 ## `_OP_MOD = 0x15` -
 ## `_OP_NEG = 0x2D` -
+
+TODO: Precedence, associativity
+TODO: Integer vs. floating point.
+TODO: Integer _and_ floating point.
+TODO: You can add strings.
+TODO: Can you add tables, arrays, classes, instances, etc.?

@@ -8,6 +8,17 @@ Each squirrel instruction is fixed-length, at 64 bits, and looks like this:
 
     arg1: i32 | op: u8 | arg0: u8 | arg2: u8 | arg3: u8
 
+Comparison with Lua:
+
+Lua has 32-bit instructions, and refers to the arguments as A, B, C, and D.
+This makes it easier to refer to the registers, because you can talk about rA
+as the register that operand A refers to, etc..
+
+Whereas here, we've got arg0 and r0, which is a bit confusing.
+We can't use `r[0]`, because it looks like an array access.
+
+Other ideas?
+
 - [loads](loads)
 - [arith](arith)
 - [bitwise](bitwise)
