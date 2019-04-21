@@ -4,3 +4,4 @@ layout: page
 ---
 
 - [The .cnut file format](cnut/)
+- [Opcodes](opcodes/)
