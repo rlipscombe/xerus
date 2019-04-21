@@ -28,3 +28,6 @@ defmodule Sqdis.MixProject do
     ]
   end
 end
+
+# TODO: ElixirLS expects the mix.exs file to be at the root of the project. This means
+# that I'm going to need separate repositories for each of the tools.
