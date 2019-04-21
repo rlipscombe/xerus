@@ -108,3 +108,17 @@ This is `_OP_RETURN`.
     02 00 00 00 00 00 00 00 - stack size
     00 - bgenerator
     01 00 00 00 00 00 00 00 - varparams
+
+## Comparison with Lua
+
+The bytecode format is spookily similar to Lua's, including the order of the parts.
+
+Squirrel literals are referred to as constants in Lua.
+Squirrel outers are Lua upvalues.
+
+http://files.catwell.info/misc/mirror/lua-5.2-bytecode-vm-dirk-laurie/lua52vm.html
+https://github.com/efrederickson/LuaAssemblyTools
+http://wiki.luajit.org/Bytecode-2.0
+
+https://the-ravi-programming-language.readthedocs.io/en/latest/ravi-overview.html
+https://the-ravi-programming-language.readthedocs.io/en/latest/lua_bytecode_reference.html
