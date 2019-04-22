@@ -37,20 +37,17 @@ Encoded as `{ op: 0x0A, arg0: 1, arg1: 0 }`.
 
 Does it actually _move_ the value, or _copy_ it? It depends on the ownership semantics of the underlying SQObject.
 
-## `_OP_LOADNULLS = 0x18` -
-## `_OP_LOADROOT = 0x19` -
-## `_OP_LOADBOOL = 0x1A` -
 ## `_OP_DMOVE = 0x1B` -
+
+
 ## `_OP_SETOUTER = 0x1F` -
 ## `_OP_GETOUTER = 0x20` -
 ## `_OP_NEWOBJ = 0x21` -
 ## `_OP_APPENDARRAY = 0x22` -
-## `_OP_COMPARITH = 0x23` -
 ## `_OP_INC = 0x24` -
 ## `_OP_INCL = 0x25` -
 ## `_OP_PINC = 0x26` -
 ## `_OP_PINCL = 0x27` -
-## `_OP_CMP = 0x28` -
 ## `_OP_EXISTS = 0x29` -
 ## `_OP_INSTANCEOF = 0x2A` -
 

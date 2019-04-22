@@ -36,3 +36,6 @@ Contrived example:
     (load-string "World!" r3)  ; literal #2
 
 ...might be encoded as `{ op: 0x04, arg0: 2, arg1: 1, arg2: 3, arg3: 2 }`
+## `_OP_LOADNULLS = 0x18` -
+## `_OP_LOADROOT = 0x19` -
+## `_OP_LOADBOOL = 0x1A` -
