@@ -6,7 +6,7 @@ defmodule Sqdis.Parser do
 
   # A closure is RIQS, 3 sizeof values, then the function proto for 'main', then LIAT.
   defp dump_closure(
-         <<"RIQS", sizeof_char::little-32, sizeof_int::little-32, sizeof_float::little-32,
+         <<"RIQS", _sizeof_char::little-32, _sizeof_int::little-32, _sizeof_float::little-32,
            rest::binary()>>
        ) do
     rest = dump_function_proto(rest)
@@ -18,8 +18,8 @@ defmodule Sqdis.Parser do
   defp dump_function_proto(rest) do
     # Names
     <<"TRAP", rest::binary()>> = rest
-    {source_name, rest} = read_object(rest)
-    {function_name, rest} = read_object(rest)
+    {_source_name, rest} = read_object(rest)
+    {_function_name, rest} = read_object(rest)
 
     # Table sizes
     <<"TRAP", rest::binary()>> = rest
@@ -30,38 +30,40 @@ defmodule Sqdis.Parser do
 
     # Literals
     <<"TRAP", rest::binary()>> = rest
-    {literals, rest} = dump_literals(nliterals, [], rest)
+    {_literals, rest} = dump_literals(nliterals, [], rest)
 
     # Parameters
     <<"TRAP", rest::binary()>> = rest
-    {parameters, rest} = dump_parameters(nparameters, [], rest)
+    {_parameters, rest} = dump_parameters(nparameters, [], rest)
 
     # Outers
     <<"TRAP", rest::binary()>> = rest
-    {outers, rest} = dump_outers(noutervalues, [], rest)
+    {_outers, rest} = dump_outers(noutervalues, [], rest)
 
     # Locals
     <<"TRAP", rest::binary()>> = rest
-    {locals, rest} = dump_locals(nlocalvarinfos, [], rest)
+    {_locals, rest} = dump_locals(nlocalvarinfos, [], rest)
 
     # Line infos
     <<"TRAP", rest::binary()>> = rest
-    {lineinfos, rest} = dump_lineinfos(nlineinfos, [], rest)
+    {_lineinfos, rest} = dump_lineinfos(nlineinfos, [], rest)
 
     # Default params
     <<"TRAP", rest::binary()>> = rest
-    {defaultparams, rest} = dump_defaultparams(ndefaultparams, [], rest)
+    {_defaultparams, rest} = dump_defaultparams(ndefaultparams, [], rest)
 
     # Instructions
     <<"TRAP", rest::binary()>> = rest
-    {instructions, rest} = dump_instructions(ninstructions, [], rest)
+    {_instructions, rest} = dump_instructions(ninstructions, [], rest)
 
     # Functions
     <<"TRAP", rest::binary()>> = rest
     {_, rest} = dump_functions(nfunctions, [], rest)
 
     # Trailer
-    <<stack_size::little-64, is_generator::little-8, var_params::little-64, rest::binary()>> = rest
+    <<_stack_size::little-64, _is_generator::little-8, _var_params::little-64, rest::binary()>> =
+      rest
+
     rest
   end
 
@@ -108,6 +110,7 @@ defmodule Sqdis.Parser do
 
   defp dump_lineinfos(count, acc, rest) do
     <<line::little-64, op::little-64, rest::binary()>> = rest
+    acc = acc ++ [{line, op}]
     dump_lineinfos(count - 1, acc, rest)
   end
 
@@ -121,16 +124,35 @@ defmodule Sqdis.Parser do
 
   defp dump_instructions(count, acc, rest) do
     {instr, rest} = dump_instruction(rest)
+    inspect_instruction(instr)
     acc = acc ++ [instr]
     dump_instructions(count - 1, acc, rest)
   end
 
   defp dump_instruction(
-         <<arg1::little-32, op::little-8, arg0::little-8, arg2::little-8, arg3::little-8,
-           rest::binary()>>
+         <<arg1::unsigned-little-32, op::unsigned-little-8, arg0::unsigned-little-8,
+           arg2::unsigned-little-8, arg3::unsigned-little-8, rest::binary()>>
        ) do
-    instr = {op, arg0, arg1, arg2, arg3} |> IO.inspect
+    instr = {op, arg0, arg1, arg2, arg3}
     {instr, rest}
+  end
+
+  @_OP_LOADINT 0x02
+  @_OP_ADD 0x11
+  @_OP_RETURN 0x17
+
+  defp inspect_instruction({@_OP_LOADINT, arg0, arg1, _arg2 = 0, _arg3 = 0}) do
+    IO.puts("loadint #{arg1} r#{arg0}   ; r#{arg0} := #{arg1}")
+  end
+
+  defp inspect_instruction({@_OP_ADD, arg0, arg1, arg2, _arg3 = 0}) do
+    # lhs = r[arg2], rhs = r[arg1], trg = r[arg0]
+    IO.puts("add r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} + r#{arg1}")
+  end
+
+  defp inspect_instruction({@_OP_RETURN, _arg0 = 255, _arg1 = 0, _arg2 = 0, _arg3 = 0}) do
+    # TODO: There's some complicated stuff going on here.
+    IO.puts("return")
   end
 
   defp dump_functions(_count = 0, acc, rest) do

@@ -8,6 +8,7 @@ defmodule Sqdis.MixProject do
       elixir: "~> 1.8",
       escript: [main_module: Sqdis.Cli],
       default_task: "escript.build",
+      elixirc_options: [warnings_as_errors: true],
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
