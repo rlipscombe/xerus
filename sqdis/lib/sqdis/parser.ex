@@ -139,10 +139,14 @@ defmodule Sqdis.Parser do
 
   @_OP_LOAD 0x01
   @_OP_LOADINT 0x02
+  @_OP_DLOAD 0x04
   @_OP_CALL 0x06
   @_OP_PREPCALLK 0x08
+  @_OP_EQ 0x0F
+  @_OP_NE 0x10
   @_OP_ADD 0x11
   @_OP_RETURN 0x17
+  @_OP_CMP 0x28
 
   defp inspect_instruction({@_OP_LOAD, arg0, arg1, _arg2 = 0, _arg3 = 0}) do
     IO.puts("load #{arg1} r#{arg0}  ; r#{arg0} := literal[#{arg1}]")
@@ -152,11 +156,17 @@ defmodule Sqdis.Parser do
     IO.puts("loadint #{arg1} r#{arg0}   ; r#{arg0} := #{arg1}")
   end
 
+  defp inspect_instruction({@_OP_DLOAD, arg0, arg1, arg2, arg3}) do
+    IO.puts("dload #{arg1} r#{arg0} #{arg3} r#{arg2}")
+    IO.puts("    ; r#{arg0} := literals[#{arg1}]")
+    IO.puts("    ; r#{arg2} := literals[#{arg3}]")
+  end
+
   defp inspect_instruction({@_OP_CALL, arg0, arg1, arg2, arg3}) do
     # call uses different args depending on *what* you're calling.
     sarg0 = to_signed(arg0)
     IO.puts("call r#{arg1} #{sarg0} #{arg3} &r#{arg2}")
-    IO.puts("    ; r2(r#{arg2}..r#{arg2+arg3-1})")
+    IO.puts("    ; r2(r#{arg2}..r#{arg2 + arg3 - 1})")
   end
 
   defp inspect_instruction({@_OP_PREPCALLK, arg0, arg1, arg2, arg3}) do
@@ -165,11 +175,27 @@ defmodule Sqdis.Parser do
     # TODO: arg2 is 'selfidx'; don't know what that's used for yet.
     # r[arg3] := obj
     # trg := obj[key]
-    IO.puts("prepcallk r#{arg2} #{arg1} r#{arg0} r#{arg3}")
+    IO.puts("prepcallk r#{arg2} L#{arg1} r#{arg0} r#{arg3}")
     IO.puts("    ; key := literal[#{arg1}]")
     IO.puts("    ; obj := r#{arg2}")
     IO.puts("    ; r#{arg3} := obj")
     IO.puts("    ; r#{arg0} := obj[key]")
+  end
+
+  defp inspect_instruction({@_OP_EQ, arg0, arg1, arg2, _arg3 = 0}) do
+    IO.puts("eq r#{arg2} r#{arg1} r#{arg0}  ; r#{arg0} := r#{arg2} == r#{arg1}")
+  end
+
+  defp inspect_instruction({@_OP_EQ, arg0, arg1, arg2, _arg3 = 255}) do
+    IO.puts("eq r#{arg2} #{arg1} r#{arg0}  ; r#{arg0} := r#{arg2} == literal[#{arg1}]")
+  end
+
+  defp inspect_instruction({@_OP_NE, arg0, arg1, arg2, _arg3 = 0}) do
+    IO.puts("ne r#{arg2} r#{arg1} r#{arg0}  ; r#{arg0} := r#{arg2} != r#{arg1}")
+  end
+
+  defp inspect_instruction({@_OP_NE, arg0, arg1, arg2, _arg3 = 255}) do
+    IO.puts("ne r#{arg2} #{arg1} r#{arg0}  ; r#{arg0} := r#{arg2} != literal[#{arg1}]")
   end
 
   defp inspect_instruction({@_OP_ADD, arg0, arg1, arg2, _arg3 = 0}) do
@@ -180,6 +206,32 @@ defmodule Sqdis.Parser do
   defp inspect_instruction({@_OP_RETURN, _arg0 = 255, _arg1 = 0, _arg2 = 0, _arg3 = 0}) do
     # TODO: There's some complicated stuff going on here.
     IO.puts("return")
+  end
+
+  @_CMP_G 0
+  @_CMP_GE 2
+  @_CMP_L 3
+  @_CMP_LE 4
+  @_CMP_3W 5
+
+  defp inspect_instruction({@_OP_CMP, arg0, arg1, arg2, arg3}) do
+    # op = arg3; lhs = r[arg2]; rhs = r[arg1]; trg = r[arg0]
+    case arg3 do
+      @_CMP_G ->
+        IO.puts("cmp.g r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} > r#{arg1}")
+
+      @_CMP_GE ->
+        IO.puts("cmp.ge r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} >= r#{arg1}")
+
+      @_CMP_L ->
+        IO.puts("cmp.l r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} < r#{arg1}")
+
+      @_CMP_LE ->
+        IO.puts("cmp.le r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} <= r#{arg1}")
+
+      @_CMP_3W ->
+        IO.puts("cmp.3w r#{arg2} r#{arg1} r#{arg0}   ; r#{arg0} := r#{arg2} <=> r#{arg1}")
+    end
   end
 
   defp dump_functions(_count = 0, acc, rest) do
