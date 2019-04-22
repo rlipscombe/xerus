@@ -61,7 +61,8 @@ defmodule Sqdis.Parser do
     {_, rest} = dump_functions(nfunctions, [], rest)
 
     # Trailer
-    <<stack_size::little-32, is_generator::8, var_params::little-32, rest::binary()>> = rest
+    <<stack_size::little-64, is_generator::little-8, var_params::little-64, rest::binary()>> = rest
+    rest
   end
 
   # TODO: Lot of duplication here.
