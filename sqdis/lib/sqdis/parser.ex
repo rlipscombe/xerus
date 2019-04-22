@@ -137,12 +137,39 @@ defmodule Sqdis.Parser do
     {instr, rest}
   end
 
+  @_OP_LOAD 0x01
   @_OP_LOADINT 0x02
+  @_OP_CALL 0x06
+  @_OP_PREPCALLK 0x08
   @_OP_ADD 0x11
   @_OP_RETURN 0x17
 
+  defp inspect_instruction({@_OP_LOAD, arg0, arg1, _arg2 = 0, _arg3 = 0}) do
+    IO.puts("load #{arg1} r#{arg0}  ; r#{arg0} := literal[#{arg1}]")
+  end
+
   defp inspect_instruction({@_OP_LOADINT, arg0, arg1, _arg2 = 0, _arg3 = 0}) do
     IO.puts("loadint #{arg1} r#{arg0}   ; r#{arg0} := #{arg1}")
+  end
+
+  defp inspect_instruction({@_OP_CALL, arg0, arg1, arg2, arg3}) do
+    # call uses different args depending on *what* you're calling.
+    sarg0 = to_signed(arg0)
+    IO.puts("call r#{arg1} #{sarg0} #{arg3} &r#{arg2}")
+    IO.puts("    ; r2(r#{arg2}..r#{arg2+arg3-1})")
+  end
+
+  defp inspect_instruction({@_OP_PREPCALLK, arg0, arg1, arg2, arg3}) do
+    # key := literal[arg1]
+    # obj := r[arg2]
+    # TODO: arg2 is 'selfidx'; don't know what that's used for yet.
+    # r[arg3] := obj
+    # trg := obj[key]
+    IO.puts("prepcallk r#{arg2} #{arg1} r#{arg0} r#{arg3}")
+    IO.puts("    ; key := literal[#{arg1}]")
+    IO.puts("    ; obj := r#{arg2}")
+    IO.puts("    ; r#{arg3} := obj")
+    IO.puts("    ; r#{arg0} := obj[key]")
   end
 
   defp inspect_instruction({@_OP_ADD, arg0, arg1, arg2, _arg3 = 0}) do
@@ -166,5 +193,10 @@ defmodule Sqdis.Parser do
          <<@_OT_STRING::little-32, length::little-64, value::bytes-size(length), rest::binary()>>
        ) do
     {value, rest}
+  end
+
+  defp to_signed(u) do
+    <<s::signed-little-8>> = <<u::unsigned-little-8>>
+    s
   end
 end
