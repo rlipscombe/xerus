@@ -87,6 +87,10 @@ For `new-slot'`, that'd be `(new-slot' r0 r1 r2 r3) ; r1[r2] := r3; r0 := r3` ..
 
 I'm beginning to think that S-expressions would be better enhanced with named parameters. Something like: `new-slot(self: r0, key: r1, value: r2, target: r3)`, but then that's almost a complete language in itself, which means it needs a custom non-S-expr parser. Meh.
 
+It turns out that Clojure supports named (and positional) arguments in S-expressions:
+
+    (the-func pos1 pos2 :name1 val1 :name2 val2)
+
 ## `_OP_DELETE = 0x0C` - delete a key from a table, class or instance
 
 ...or a UserData (??)
